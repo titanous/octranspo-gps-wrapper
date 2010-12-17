@@ -6,7 +6,7 @@ var http    = require('http'),
     elf     = require('elf-logger'),
     secrets = require('./secrets');
 
-router.get('/stop/*/routes', function(req, res, stop) {
+router.get('/stop/*/trips', function(req, res, stop) {
   var query = url.parse(req.url, true).query;
 
   if (query) {
@@ -19,7 +19,7 @@ router.get('/stop/*/routes', function(req, res, stop) {
       }
 
       logHit(apiKey);
-      getStopRoutes(res, stop, query.trips || 3);
+      getStopTrips(res, stop, query.count || 3);
     });
   } else {
     badDevKey(res);
@@ -50,8 +50,8 @@ function dateHourStamp() {
   return '' + date.getFullYear() + (date.getMonth() + 1) + date.getDate() + date.getHours();
 }
 
-function getStopRoutes(res, stop, trips) {
-  var body = getStopRoutesBody(stop, trips);
+function getStopTrips(res, stop, count) {
+  var body = getStopTripsBody(stop, count);
 
   var octranspo = http.createClient(80, 'www.octranspo.com');
   var request = octranspo.request('POST', '/GpsService/Service.asmx',
@@ -76,15 +76,15 @@ function getStopRoutes(res, stop, trips) {
   });
 }
 
-function getStopRoutesBody(stop, trip) {
+function getStopTripsBody(stop, count) {
     return '<?xml version="1.0" encoding="utf-8"?>                   \
 <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"                         \
 xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">              \
   <soap:Body>                                                        \
     <GetNextRoutesForStop xmlns="http://tempuri.org/">               \
-      <stopId>' + stop+ '</stopId>                                   \
-      <tripCount>' + trip+ '</tripCount>                             \
+      <stopId>' + stop + '</stopId>                                   \
+      <tripCount>' + count + '</tripCount>                             \
       <includeGpsData>true</includeGpsData>                          \
       <apiKey>' + secrets.octranspo_api_key + '</apiKey>             \
     </GetNextRoutesForStop>                                          \
