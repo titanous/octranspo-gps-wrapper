@@ -3,6 +3,7 @@ var http    = require('http'),
     sys     = require('sys'),
     router  = require('choreographer').router(),
     redis   = require('redis').createClient(),
+    elf     = require('elf-logger'),
     secrets = require('./secrets');
 
 router.get('/stop/*/routes', function(req, res, stop) {
@@ -25,8 +26,9 @@ router.get('/stop/*/routes', function(req, res, stop) {
   }
 });
 
-http.createServer(router).listen(8080);
-console.log('Server running at http://127.0.0.1:8080/');
+httpServer = http.createServer(router);
+elf.createLogger(httpServer);
+module.exports = httpServer; // for spark
 
 function badDevKey(res) {
   res.writeHead(403, {'Content-Type': 'text/plain'});
